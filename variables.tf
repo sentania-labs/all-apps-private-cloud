@@ -34,27 +34,14 @@ variable "insecure" {
   type    = bool
   default = true
 }
-########################################
-# Project Definitions
-########################################
 
-/**
- * projects
- *
- * A map of project configurations.
- *
- * Structure:
- *   projects = {
- *     key = {
- *       name           = string
- *       description    = string
- *     }
- *   }
- */
 variable "projects" {
-  description = "Map of project definitions."
   type = map(object({
-    name        = string
-    description = string
+    project_name = string
+    role_bindings = list(object({
+      kind = string
+      name = string
+      role = string
+    }))
   }))
 }

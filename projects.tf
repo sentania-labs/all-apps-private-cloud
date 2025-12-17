@@ -7,4 +7,3 @@ module "projects" {
   project_name = each.value.name
   description  = each.value.description
 }
-
