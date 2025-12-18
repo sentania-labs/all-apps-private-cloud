@@ -5,7 +5,10 @@ module "project_role_binding" {
   version = "0.1.0"
 
   project_name = each.value.project_name
-  kind         = each.value.kind
-  name         = each.value.name
-  role         = each.value.role
+  role = {
+    kind = each.value.kind
+    name = each.value.name
+    role = each.value.role
+  }
+
 }
