@@ -38,6 +38,7 @@ variable "insecure" {
 variable "projects" {
   type = map(object({
     project_name = string
+    description  = string
     role_bindings = list(object({
       kind = string
       name = string
