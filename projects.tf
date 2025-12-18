@@ -4,6 +4,6 @@ module "projects" {
 
   for_each = var.projects
 
-  project_name = each.value.name
+  project_name = each.value.project_name
   description  = each.value.description
 }

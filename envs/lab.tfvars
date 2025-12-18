@@ -3,8 +3,8 @@ vcfa_organization = "vcf-lab-all-apps"
 
 projects = {
   sandbox_project = {
-    name        = "vcf-lab-sandbox-tf"
-    description = "This is a project created with TF - Do Not Edit"
+    project_name = "vcf-lab-sandbox-tf"
+    description  = "This is a project created with TF - Do Not Edit"
     role_bindings = [
       {
         kind = "Group"
