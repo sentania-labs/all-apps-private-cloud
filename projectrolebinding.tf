@@ -2,7 +2,7 @@ module "project_role_binding" {
   for_each = local.project_role_bindings
 
   source  = "sentania-labs/projectrolebinding/vcfa"
-  version = "0.1.0"
+  version = "0.2.0"
 
   project_name = each.value.project_name
   role = {
