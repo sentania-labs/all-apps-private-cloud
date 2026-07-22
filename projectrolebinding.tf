@@ -11,4 +11,8 @@ module "project_role_binding" {
     role = each.value.role
   }
 
+  # Role bindings are CRs inside the project's namespace; the project
+  # (which creates that namespace) must exist first, or apply races and
+  # fails with "Namespace '<project>' not found".
+  depends_on = [module.projects]
 }
