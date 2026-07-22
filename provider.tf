@@ -6,13 +6,17 @@ provider "vcfa" {
   auth_type            = "api_token"
 }
 
-data "vcfa_kubeconfig" "kubeconfig" {}
-
-provider "kubernetes" {
-  host     = data.vcfa_kubeconfig.kubeconfig.host
-  insecure = data.vcfa_kubeconfig.kubeconfig.insecure_skip_tls_verify
-  token    = data.vcfa_kubeconfig.kubeconfig.token
-}
+# --- Workload / VKS path (disabled until the org is Supervisor-backed) ---
+# vcfa_kubeconfig is read at plan time and requires the org to have a region
+# quota + supervisor namespace. Re-enable this and the kubernetes provider
+# together when building the VM Service / VKS workload resources.
+# data "vcfa_kubeconfig" "kubeconfig" {}
+#
+# provider "kubernetes" {
+#   host     = data.vcfa_kubeconfig.kubeconfig.host
+#   insecure = data.vcfa_kubeconfig.kubeconfig.insecure_skip_tls_verify
+#   token    = data.vcfa_kubeconfig.kubeconfig.token
+# }
 
 
 

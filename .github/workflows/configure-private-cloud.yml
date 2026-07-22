@@ -21,10 +21,8 @@ jobs:
       TF_IN_AUTOMATION: "true"
       TF_INPUT: "false"
 
-      # vSphere / vRA / VCF environment-specific credentials
-      TF_VAR_serviceAccountUserName: ${{ secrets.SERVICEACCOUNTUSERNAME }}
-      TF_VAR_serviceAccountPassword: ${{ secrets.SERVICEACCOUNTPASSWORD }}
-      TF_VAR_vcfa_refresh_token: ${{ secrets.VCF_LAB_ALL_APPS_REFRESH_KEY}}
+      # VCFA API token (all-apps tenant) + GitHub PAT for repo-per-project (CICD path)
+      TF_VAR_vcfa_refresh_token: ${{ secrets.VCF_LAB_ALL_APPS_REFRESH_KEY }}
       TF_VAR_github_access_token: ${{ secrets.REPO_ACCESS_TOKEN }}
 
     steps:
@@ -35,8 +33,7 @@ jobs:
         run: terraform fmt -check
 
       - name: Terraform Init
-        run: |
-             terraform init -migrate-state -input=false -upgrade \
+        run: terraform init -migrate-state -input=false -upgrade
 
       - name: Terraform Validate
         run: terraform validate

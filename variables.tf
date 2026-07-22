@@ -35,6 +35,16 @@ variable "insecure" {
   default = true
 }
 
+/**
+ * github_access_token
+ * GitHub PAT used by the github provider to manage per-project repos
+ * (repo-per-project CICD path). Supplied via TF_VAR_github_access_token.
+ */
+variable "github_access_token" {
+  type      = string
+  sensitive = true
+}
+
 variable "projects" {
   type = map(object({
     project_name = string
