@@ -8,7 +8,7 @@ projects = {
     role_bindings = [
       {
         kind = "Group"
-        name = "labAdmins@int.sentania.net"
+        name = "labadmins@int.sentania.net"
         role = "admin"
       },
       {
