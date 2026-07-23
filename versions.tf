@@ -1,15 +1,17 @@
 terraform {
-  required_version = ">= 1.1.9"
+  required_version = ">= 1.14.0"
   required_providers {
     kubernetes = {
-      source = "hashicorp/kubernetes"
+      source  = "hashicorp/kubernetes"
+      version = "~> 3.2"
     }
     vcfa = {
-      source = "vmware/vcfa"
+      source  = "vmware/vcfa"
+      version = "~> 1.2"
     }
     github = {
       source  = "integrations/github"
-      version = ">= 4.20.0, < 6.0.0"
+      version = "~> 5.45"
     }
   }
 }
