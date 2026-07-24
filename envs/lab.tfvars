@@ -18,17 +18,21 @@ projects = {
       }
     ]
     namespace = {
-      # UNCONFIRMED placeholders — must be replaced with real live values
-      # before merge. vpc_name: auto-generated default VPC name for this
-      # project, not yet queried live. class_name: name of the
-      # SupervisorNamespaceClass an org-admin must create; unconfirmed
-      # whether one exists yet in vcf-lab-all-apps.
-      vpc_name   = "REPLACE_ME_VPC_NAME"
-      class_name = "REPLACE_ME_CLASS_NAME"
+      vpc_name   = "default-vcf-lab-region01"
+      class_name = "small"
       storage_classes = {
         "iscsi-default-policy" = { limit = "100Gi" }
       }
       vm_classes = ["best-effort-small", "best-effort-medium"]
+      zones = [
+        {
+          name               = "domain-c10"
+          cpu_limit          = "10000M"
+          cpu_reservation    = "0M"
+          memory_limit       = "10000Mi"
+          memory_reservation = "0M"
+        }
+      ]
     }
   }
 }

@@ -1,6 +1,6 @@
 module "supervisor_namespace" {
   source  = "sentania-labs/supervisor-namespace/vcfa"
-  version = "0.2.0"
+  version = "0.2.1"
 
   for_each = { for k, p in var.projects : k => p if p.namespace != null }
 
