@@ -54,5 +54,21 @@ variable "projects" {
       name = string
       role = string
     }))
+    # Attaches a SupervisorNamespace to this project via
+    # sentania-labs/supervisor-namespace/vcfa. Optional so projects
+    # that don't need one require no changes.
+    namespace = optional(object({
+      vpc_name        = string
+      class_name      = string
+      vm_classes      = list(string)
+      storage_classes = map(object({ limit = string }))
+      zones = optional(list(object({
+        name               = string
+        cpu_limit          = string
+        cpu_reservation    = string
+        memory_limit       = string
+        memory_reservation = string
+      })), [])
+    }))
   }))
 }
