@@ -62,13 +62,13 @@ variable "projects" {
       class_name      = string
       vm_classes      = list(string)
       storage_classes = map(object({ limit = string }))
-      zones = optional(list(object({
+      zones = list(object({
         name               = string
         cpu_limit          = string
         cpu_reservation    = string
         memory_limit       = string
         memory_reservation = string
-      })), [])
+      }))
     }))
   }))
 }
