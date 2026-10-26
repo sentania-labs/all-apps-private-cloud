@@ -14,19 +14,42 @@ all-apps-private-cloud/
 ├── variables.tf            # vcfa_url, vcfa_refresh_token, projects map
 ├── versions.tf             # Required providers
 ├── provider.tf             # VCFA provider config
-├── backend.tf              # S3 remote state
+├── backend.tf              # Lab S3 remote state
 └── envs/                   # Environment tfvars
 ```
 
-## Usage
+## What this repo owns
+
+The VCFA projects, project role bindings and supervisor namespaces for the All Apps tenant, as declared in `envs/lab.tfvars`. State lives on the lab S3 (bucket `tfstate`, key `vra/all-apps-private-cloud/lab/terraform.tfstate`, endpoint `https://s3.int.sentania.net:9443`, lock file locking); see `backend.tf`. Only runners with the `lab` label can reach it.
+
+This repo has never written state, so the first apply creates everything the config declares.
+
+## CI
+
+`.github/workflows/configure-private-cloud.yml` runs on the `lab` runner pool.
+
+- Pull requests and pushes to `main`: fmt, init, validate and **plan only**. Nothing is applied.
+- Apply: run the workflow manually (Actions, "Configure Lab Private Cloud", Run workflow) on `main` and set `confirm_apply` to `apply`. Any other value plans only. The plan file is applied in the same job and is never uploaded.
+
+State credentials are the org secrets `TF_STATE_S3_ACCESS_KEY_ID` / `TF_STATE_S3_SECRET_ACCESS_KEY`, which must be scoped to this repository.
+
+## First apply
+
+1. Confirm this repo is in scope for the two state secrets above.
+2. Open a PR or run the workflow with the default input and read the plan. Against empty state it should show every declared resource as a create; check that against what already exists in VCFA, and import anything that does.
+3. Run the workflow manually on `main` with `confirm_apply` = `apply`.
+
+## Local use
+
+Run against the lab only through the workflow. For syntax checks without touching state:
 
 ```bash
-terraform init -backend-config="key=all-apps-private-cloud/terraform.tfstate"
-terraform plan  -var-file="envs/<your-env>.tfvars"
-terraform apply -var-file="envs/<your-env>.tfvars"
+terraform init -backend=false
+terraform validate
+terraform fmt -check
 ```
 
-Credentials (`vcfa_refresh_token`) should not be committed — supply via `.tfvars` or `TF_VAR_vcfa_refresh_token`.
+Credentials (`vcfa_refresh_token`) should not be committed; they come from `TF_VAR_*` secrets in CI.
 
 ## License
 
