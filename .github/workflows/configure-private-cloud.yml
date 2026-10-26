@@ -15,8 +15,34 @@ on:
         type: string
 
 jobs:
+  # Runs on pull requests with no secrets in the environment, so branch code
+  # (including Terraform it declares) never executes alongside lab credentials.
+  check:
+    if: github.event_name == 'pull_request'
+    runs-on: lab
+    permissions:
+      contents: read
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      - name: Terraform Init (no backend)
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+  # Credentialed plan/apply: only code already on main, never a pull request.
   terraform:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.owner.login == 'sentania-labs'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     runs-on: lab
 
     env:
@@ -51,8 +77,8 @@ jobs:
               -var-file="envs/lab.tfvars" \
               -out=tfplan
 
-      # Apply is manual only: pushes and PRs stop at the plan. The plan file
-      # carries credentials, so it is applied in this job and never uploaded.
+      # Apply is manual only: pushes stop at the plan. The plan file carries
+      # credentials, so it is applied in this job and never uploaded.
       - name: Terraform Apply
-        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.confirm_apply == 'apply'
+        if: github.event_name == 'workflow_dispatch' && inputs.confirm_apply == 'apply'
         run: terraform apply -input=false -auto-approve tfplan

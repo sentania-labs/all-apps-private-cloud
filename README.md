@@ -28,15 +28,16 @@ This repo has never written state, so the first apply creates everything the con
 
 `.github/workflows/configure-private-cloud.yml` runs on the `lab` runner pool.
 
-- Pull requests and pushes to `main`: fmt, init, validate and **plan only**. Nothing is applied.
-- Apply: run the workflow manually (Actions, "Configure Lab Private Cloud", Run workflow) on `main` and set `confirm_apply` to `apply`. Any other value plans only. The plan file is applied in the same job and is never uploaded.
+- Pull requests: credential-free checks only (fmt, `init -backend=false`, validate). No secrets are exposed, so branch code never runs with lab credentials and no plan is produced.
+- Pushes to `main`: fmt, init, validate and **plan only**, with the lab credentials. Nothing is applied.
+- Apply: run the workflow manually (Actions, "Configure Lab Private Cloud", Run workflow) on `main` and set `confirm_apply` to `apply`. Any other value plans only. Dispatch runs from branches other than `main` do nothing. The plan file is applied in the same job and is never uploaded.
 
 State credentials are the org secrets `TF_STATE_S3_ACCESS_KEY_ID` / `TF_STATE_S3_SECRET_ACCESS_KEY`, which must be scoped to this repository.
 
 ## First apply
 
 1. Confirm this repo is in scope for the two state secrets above.
-2. Open a PR or run the workflow with the default input and read the plan. Against empty state it should show every declared resource as a create; check that against what already exists in VCFA, and import anything that does.
+2. Run the workflow manually on `main` with the default input and read the plan (PRs do not plan). Against empty state it should show every declared resource as a create; check that against what already exists in VCFA, and import anything that does.
 3. Run the workflow manually on `main` with `confirm_apply` = `apply`.
 
 ## Local use
