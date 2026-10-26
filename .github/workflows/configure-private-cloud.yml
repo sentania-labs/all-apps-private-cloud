@@ -7,18 +7,50 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      confirm_apply:
+        description: 'Type "apply" to apply the plan to the lab. Anything else runs plan only.'
+        required: true
+        default: "plan-only"
+        type: string
 
 jobs:
+  # Runs on pull requests with no secrets in the environment, so branch code
+  # (including Terraform it declares) never executes alongside lab credentials.
+  check:
+    if: github.event_name == 'pull_request'
+    runs-on: lab
+    permissions:
+      contents: read
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      - name: Terraform Init (no backend)
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+  # Credentialed plan/apply: only code already on main, never a pull request.
   terraform:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.owner.login == 'sentania-labs'
-    runs-on: [self-hosted, terraform]
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    runs-on: lab
 
     env:
       # State backend credentials (lab S3). The S3 backend reads the AWS_*
       # names, so the lab key is passed under them; nothing here talks to AWS.
       AWS_ACCESS_KEY_ID: ${{ secrets.TF_STATE_S3_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_STATE_S3_SECRET_ACCESS_KEY }}
-      
+
       TF_IN_AUTOMATION: "true"
       TF_INPUT: "false"
 
@@ -34,7 +66,7 @@ jobs:
         run: terraform fmt -check
 
       - name: Terraform Init
-        run: terraform init -migrate-state -input=false
+        run: terraform init -input=false
 
       - name: Terraform Validate
         run: terraform validate
@@ -45,15 +77,8 @@ jobs:
               -var-file="envs/lab.tfvars" \
               -out=tfplan
 
-      - name: Upload Plan Artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: terraform-plan
-          path: tfplan
-
+      # Apply is manual only: pushes stop at the plan. The plan file carries
+      # credentials, so it is applied in this job and never uploaded.
       - name: Terraform Apply
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'workflow_dispatch' && inputs.confirm_apply == 'apply'
         run: terraform apply -input=false -auto-approve tfplan
-
-      - name: Clean workspace
-        run: rm -rf $GITHUB_WORKSPACE/.[!.]*
